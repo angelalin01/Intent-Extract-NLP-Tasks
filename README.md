@@ -1,5 +1,5 @@
 # Intent-Extract-NLP-Tasks
-Various Python-based NLP algorithms used in customer intent extraction from customer query inputs to customer support chatbot: spell check, co-reference resolution, word sense disambiguation, semantic role analysis in each sentence
+Various Python-based NLP algorithms used to perform intent extraction from query inputs to customer support chatbot: spell check, co-reference resolution, word sense disambiguation, semantic role analysis in each sentence
 
 Actual chat transcripts not included as they are proprietary Microsoft data. This repo merely provides a framework to analyze a certain type of customer query input data and accurately extract intents through NLP algorithms. Work done during internship at Microsoft. 
 
