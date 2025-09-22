@@ -39,6 +39,7 @@ sameWords_freqCount = []
 same_words = []
 levshDist = 2
 levsh_ratio_thresh = 1/3 #Levsh ratio = levenshtein distance/length of correctly spelled word
+MIN_WORD_LENGTH = 3
 #same_word_count = 0
 potential_spell_error = 0
 most_frequent = []
@@ -73,7 +74,7 @@ class DetectionAction():
             pos_tags = nltk.pos_tag(tokens)
             for j in pos_tags:
                 #we only care if the tag is a verb/action word 
-                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= 3 and j[0] not in read_freq_words_words):
+                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= MIN_WORD_LENGTH and j[0] not in read_freq_words_words):
                     chatActionEnts_filtered.append([j[0], j[1]])
                     if(j[1] == 'VB'):
                         VB_count = VB_count+1
