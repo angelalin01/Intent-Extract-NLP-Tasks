@@ -1,0 +1,21 @@
+[file]
+KB_content = data.csv
+aet = actionEntityLibrary.csv
+pet = productEntityLibrary.csv
+ote = otherEntityLibrary.csv
+pesw = productEntityStopWords.txt
+ambInd = ambiguityIndicators.txt
+testSpell = spellErrorTest.csv
+otherEvent = otherEventLibrary.csv
+datasource = data.csv
+prodsource = productEntities.csv
+mostfreqAct = mostFrequentActs.csv
+mostfreqProd = mostFrequentProds.csv
+chatActEnts = chatActionEnts.csv
+chatActEntsLemm = chatActionEnts_lemm.csv
+
+[watson]
+max_retries = 3
+base_delay = 1.0
+max_delay = 60.0
+requests_per_second = 10.0
