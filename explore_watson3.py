@@ -1,9 +1,125 @@
 import json
 import nltk
 import configparser
+import os
+import time
+import random
+import logging
+from functools import wraps
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features, CategoriesOptions, ConceptsOptions, KeywordsOptions, EntitiesOptions, RelationsOptions, SemanticRolesOptions
+from ibm_watson import ApiException
 from filestools import Tools
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def watson_retry(max_retries=3, base_delay=1.0, max_delay=60.0, backoff_multiplier=2.0):
+    """
+    Decorator for Watson API calls with exponential backoff retry logic.
+    
+    Args:
+        max_retries: Maximum number of retry attempts
+        base_delay: Initial delay between retries in seconds
+        max_delay: Maximum delay between retries in seconds
+        backoff_multiplier: Multiplier for exponential backoff
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except ApiException as e:
+                    last_exception = e
+                    
+                    if 400 <= e.code < 500 and e.code != 429:
+                        logger.error(f"Watson API client error (non-retryable): {e.code} - {e.message}")
+                        raise e
+                    
+                    if attempt < max_retries:
+                        delay = min(base_delay * (backoff_multiplier ** attempt), max_delay)
+                        jitter = random.uniform(0.1, 0.3) * delay
+                        total_delay = delay + jitter
+                        
+                        logger.warning(f"Watson API error (attempt {attempt + 1}/{max_retries + 1}): {e.code} - {e.message}. Retrying in {total_delay:.2f}s")
+                        time.sleep(total_delay)
+                    else:
+                        logger.error(f"Watson API error after {max_retries + 1} attempts: {e.code} - {e.message}")
+                        raise e
+                        
+                except Exception as e:
+                    last_exception = e
+                    
+                    if attempt < max_retries:
+                        delay = min(base_delay * (backoff_multiplier ** attempt), max_delay)
+                        jitter = random.uniform(0.1, 0.3) * delay
+                        total_delay = delay + jitter
+                        
+                        logger.warning(f"Network/connection error (attempt {attempt + 1}/{max_retries + 1}): {str(e)}. Retrying in {total_delay:.2f}s")
+                        time.sleep(total_delay)
+                    else:
+                        logger.error(f"Network/connection error after {max_retries + 1} attempts: {str(e)}")
+                        raise e
+            
+            raise last_exception
+        return wrapper
+    return decorator
+
+
+class WatsonAPIManager:
+    """Centralized Watson API manager with rate limiting and graceful degradation."""
+    
+    def __init__(self, client, requests_per_minute=100):
+        self.client = client
+        self.requests_per_minute = requests_per_minute
+        self.request_times = []
+        self.fallback_mode = False
+        
+    def _check_rate_limit(self):
+        """Check if we're within rate limits."""
+        now = time.time()
+        self.request_times = [t for t in self.request_times if now - t < 60]
+        
+        if len(self.request_times) >= self.requests_per_minute:
+            sleep_time = 60 - (now - self.request_times[0])
+            if sleep_time > 0:
+                logger.warning(f"Rate limit reached. Sleeping for {sleep_time:.2f}s")
+                time.sleep(sleep_time)
+                
+        self.request_times.append(now)
+    
+    @watson_retry(max_retries=3)
+    def analyze_with_retry(self, **kwargs):
+        """Analyze text with retry logic and rate limiting."""
+        if self.client is None:
+            logger.error("Watson client not available, entering fallback mode")
+            self.fallback_mode = True
+            return self._fallback_response()
+            
+        self._check_rate_limit()
+        
+        try:
+            response = self.client.analyze(**kwargs).get_result()
+            logger.debug(f"Watson API call successful")
+            return response
+        except Exception as e:
+            logger.error(f"Watson API call failed: {str(e)}")
+            self.fallback_mode = True
+            return self._fallback_response()
+    
+    def _fallback_response(self):
+        """Return a fallback response when Watson API is unavailable."""
+        logger.warning("Using fallback response due to Watson API unavailability")
+        return {
+            'semantic_roles': [],
+            'usage': {'text_units': 0, 'text_characters': 0, 'features': 0},
+            'language': 'en',
+            'fallback_mode': True
+        }
+
 
 cf = configparser.ConfigParser()
 cf.read("dbconf")
@@ -18,12 +134,21 @@ for i in action_entity_output:
 read_output_relations_semantics = Tools.read_csv_KB_relations_semantics(datafile)
 output = []
 
+watson_api_key = os.getenv('WATSON_API_KEY', 'INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31')
+watson_url = os.getenv('WATSON_URL', 'https://gateway.watsonplatform.net/natural-language-understanding/api')
 
-natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+try:
+    natural_language_understanding = NaturalLanguageUnderstandingV1(
+        version='2019-07-12',
+        iam_apikey=watson_api_key,
+        url=watson_url
     )
+    logger.info("Watson NLU client initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize Watson NLU client: {str(e)}")
+    natural_language_understanding = None
+
+watson_manager = WatsonAPIManager(natural_language_understanding) if natural_language_understanding else None
 
 
 def get_actions_related_to_entities():
@@ -70,10 +195,18 @@ def get_actions_related_to_entities():
         content_sentences = i[3].split('.')
         title_tokens = title.split(' ')
         
-        response = natural_language_understanding.analyze(
-        text=title,
-        features=Features(semantic_roles=SemanticRolesOptions())).get_result()
-        json_dict = json.loads(json.dumps(response)) #turns json string output into dictionary
+        if watson_manager is None:
+            logger.error("Watson API manager not available, skipping Watson analysis")
+            json_dict = {'semantic_roles': []}
+        else:
+            response = watson_manager.analyze_with_retry(
+                text=title,
+                features=Features(semantic_roles=SemanticRolesOptions())
+            )
+            json_dict = response
+            
+            if json_dict.get('fallback_mode'):
+                logger.warning("Watson API in fallback mode, using custom POS tagging")#turns json string output into dictionary
         
         #extract json values
         values_to_actions = [] # [event entities]
@@ -211,12 +344,9 @@ def check_if_action_key_exists(action, actions_to_entities_dict, values_to_actio
 
 #OTHER WATSON TEST FUNCTIONS
 def test_watson():
-    #print('hi')
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
-    )
+    if watson_manager is None:
+        logger.error("Watson API manager not available for testing")
+        return
     #print('xx')
     for i in read_output:
         #print('hello')
@@ -229,25 +359,25 @@ def test_watson():
         #print(json.dumps(categories_response, indent=2))
 
         #key concepts
-        concepts_response = natural_language_understanding.analyze(
+        concepts_response = watson_manager.analyze_with_retry(
         url=url_link,
-        features=Features(concepts=ConceptsOptions(limit=10))).get_result()
+        features=Features(concepts=ConceptsOptions(limit=10)))
         output.append(json.dumps(concepts_response, indent=2))
         print('CONCEPTS')
         print(json.dumps(concepts_response, indent=2))
 
         #top keywords
-        keywords_response = natural_language_understanding.analyze(
+        keywords_response = watson_manager.analyze_with_retry(
         url=url_link,
-        features=Features(keywords=KeywordsOptions(sentiment=True,emotion=False,limit=10))).get_result()
+        features=Features(keywords=KeywordsOptions(sentiment=True,emotion=False,limit=10)))
         output.append(json.dumps(concepts_response, indent=2))
         print('KEYWORDS')
         print(json.dumps(keywords_response, indent=2))
 
         #top entities
-        entities_response = natural_language_understanding.analyze(
+        entities_response = watson_manager.analyze_with_retry(
         url=url_link,
-        features=Features(entities=EntitiesOptions(sentiment=False,limit=10))).get_result()
+        features=Features(entities=EntitiesOptions(sentiment=False,limit=10)))
         output.append(json.dumps(concepts_response, indent=2))
         print('ENTITIES')
         print(json.dumps(entities_response, indent=2))
@@ -256,43 +386,38 @@ def test_watson():
 
 #semantic roles 
 def test_example():
-        
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
-    )
+    if watson_manager is None:
+        logger.error("Watson API manager not available for testing")
+        return
 
     
-    response1 = natural_language_understanding.analyze(
+    response1 = watson_manager.analyze_with_retry(
     text='To use MPN support contracts, you need the Access ID and Contract ID for the support contract. ',
-    features=Features(semantic_roles=SemanticRolesOptions())).get_result()
+    features=Features(semantic_roles=SemanticRolesOptions()))
     #print(json.dumps(response1, indent=2))
 
-    response2 = natural_language_understanding.analyze(
+    response2 = watson_manager.analyze_with_retry(
     text='Demonstrate your proven expertise in delivering quality solutions in one or more specialized areas of business. ',
-    features=Features(semantic_roles=SemanticRolesOptions())).get_result()
+    features=Features(semantic_roles=SemanticRolesOptions()))
 
     #print(json.dumps(response2, indent=2))
 
-    response3 = natural_language_understanding.analyze(
+    response3 = watson_manager.analyze_with_retry(
     url='https://docs.microsoft.com/en-us/partner-center/',
-    features=Features(semantic_roles=SemanticRolesOptions())).get_result()
+    features=Features(semantic_roles=SemanticRolesOptions()))
 
     print(json.dumps(response3, indent=2))
 
 
 
 def test_example_relations():
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
-    )
+    if watson_manager is None:
+        logger.error("Watson API manager not available for testing")
+        return
 
-    response1 = natural_language_understanding.analyze(
+    response1 = watson_manager.analyze_with_retry(
     text='To use MPN support contracts, you need the Access ID and Contract ID for the support contract. ',
-    features=Features(relations=RelationsOptions())).get_result()
+    features=Features(relations=RelationsOptions()))
     json_dict = json.loads(json.dumps(response1))
     print(json_dict['usage']['text_units'])
     print(json_dict['relations'])
@@ -300,21 +425,18 @@ def test_example_relations():
     #print(json.dumps(response1, indent=2))
 
 
-    response2 = natural_language_understanding.analyze(
+    response2 = watson_manager.analyze_with_retry(
     text='Demonstrate your proven expertise in delivering quality solutions in one or more specialized areas of business. ',
-    features=Features(relations=RelationsOptions())).get_result()
+    features=Features(relations=RelationsOptions()))
     print(json.dumps(response2, indent=2))
 
 
 
 
 def test_watson_relations_semantics():
-    #print('hi')
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
-    )
+    if watson_manager is None:
+        logger.error("Watson API manager not available for testing")
+        return
     string = 'Add licenses or services to an existing subscription'
 
   
@@ -326,16 +448,16 @@ def test_watson_relations_semantics():
 
 
         #top relations; this is generic just from watson's current library but we can customize later
-        relations_response = natural_language_understanding.analyze(
+        relations_response = watson_manager.analyze_with_retry(
         url=url_link,
-        features=Features(relations=RelationsOptions())).get_result()
+        features=Features(relations=RelationsOptions()))
         output.append(json.dumps(relations_response, indent=2))
         print('RELATIONS')
         print(json.dumps(relations_response, indent=2))
 
-        semantics_response = natural_language_understanding.analyze(
+        semantics_response = watson_manager.analyze_with_retry(
         url=url_link,
-        features=Features(semantic_roles=SemanticRolesOptions())).get_result()
+        features=Features(semantic_roles=SemanticRolesOptions()))
         output.append(json.dumps(semantics_response, indent=2))
         print('SEMANTICS')
         print(json.dumps(semantics_response, indent=2))   
