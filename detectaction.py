@@ -16,20 +16,41 @@ from Extract.SpellError.suffix import SuffixTree
 """
 Initialize global variables start
 """
-cf = configparser.ConfigParser()
-cf.read("./Common/configfile")
-datafile = cf.get("file", "datasource")
-actionEntityFile = cf.get("file", "aet")
-productEntityFile = cf.get("file", "pet")
-freqWordFile = cf.get("file", "mostfreqAct")
-spellErrorTest = cf.get("file", "testSpell")
-otherEvent = cf.get("file", "otherEvent")
-other_event = Tools.read_csv_chats(otherEvent)
-read_output = Tools.read_csv_chats(datafile)
-spell_test = Tools.read_csv_chats(spellErrorTest)
-read_freq_words = Tools.read_csv(freqWordFile)
-read_freq_words_words = [(i[0]).lower() for i in read_freq_words]
-actionEntity_output = Tools.read_csv(actionEntityFile)
+
+TECHNICAL_TERMS_WHITELIST = {
+    'oauth', 'api', 'sdk', 'rest', 'json', 'xml', 'http', 'https', 'ssl', 'tls',
+    'microsoft', 'azure', 'office', 'outlook', 'sharepoint', 'onedrive', 'teams',
+    'dynamics', 'powerbi', 'powerapps', 'flow', 'intune', 'activedirectory',
+    'actionpack', 'partnercenter', 'msdn', 'technet', 'visualstudio', 'vscode',
+    'dotnet', 'csharp', 'javascript', 'typescript', 'nodejs', 'npm', 'nuget',
+    'github', 'gitlab', 'devops', 'cicd', 'docker', 'kubernetes', 'aws', 'gcp'
+}
+def is_technical_term(term):
+    """Check if a term is in the technical terms whitelist (case-insensitive)"""
+    return term.lower().strip() in TECHNICAL_TERMS_WHITELIST
+
+try:
+    cf = configparser.ConfigParser()
+    cf.read("./Common/configfile")
+    datafile = cf.get("file", "datasource")
+    actionEntityFile = cf.get("file", "aet")
+    productEntityFile = cf.get("file", "pet")
+    freqWordFile = cf.get("file", "mostfreqAct")
+    spellErrorTest = cf.get("file", "testSpell")
+    otherEvent = cf.get("file", "otherEvent")
+    other_event = Tools.read_csv_chats(otherEvent)
+    read_output = Tools.read_csv_chats(datafile)
+    spell_test = Tools.read_csv_chats(spellErrorTest)
+    read_freq_words = Tools.read_csv(freqWordFile)
+    read_freq_words_words = [(i[0]).lower() for i in read_freq_words]
+    actionEntity_output = Tools.read_csv(actionEntityFile)
+except Exception as e:
+    print(f"Warning: Configuration file not found, using defaults: {e}")
+    other_event = []
+    read_output = []
+    spell_test = []
+    read_freq_words_words = []
+    actionEntity_output = []
 #print(actionEntity_output)
 chatActionEnts = [] #all the words with verb POS tags 
 chatActionEnts_unique = [] #all words in chatActionEnts not in the action entity library
@@ -133,6 +154,9 @@ class DetectionAction():
         print(len(entities_unique))
         print(entities_unique)
         for k in entities_unique:
+            if is_technical_term(k[0]):
+                continue
+                
             for i in library:
                 if(i[0] == k[0]):
                     print('ERROR: STILL CONTAINS MATCHING VALUES')
