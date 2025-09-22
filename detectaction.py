@@ -2,7 +2,10 @@
 import nltk
 import textdistance
 from math import log 
-from Common.filestools import Tools
+try:
+    from Common.filestools import Tools
+except ImportError:
+    Tools = None
 import configparser
 import re
 from nltk.stem import WordNetLemmatizer
@@ -10,8 +13,9 @@ import sys
 import argparse
 from nltk import FreqDist
 from nltk import ngrams
-from Extract.SpellError.distanceedit import DistanceEdit
-from Extract.SpellError.suffix import SuffixTree
+from distanceedit import DistanceEdit
+from suffix import SuffixTree
+from technical_terms import is_technical_term
 
 """
 Initialize global variables start
@@ -133,6 +137,10 @@ class DetectionAction():
         print(len(entities_unique))
         print(entities_unique)
         for k in entities_unique:
+            if is_technical_term(k[0]):
+                print(f'SKIPPING TECHNICAL TERM: {k[0]}')
+                continue
+                
             for i in library:
                 if(i[0] == k[0]):
                     print('ERROR: STILL CONTAINS MATCHING VALUES')

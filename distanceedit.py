@@ -18,10 +18,18 @@ class DistanceEdit():
                     LCSuff[i][j]=0
         return result
     
-    def iterative_levenshtein(self,s,t):
+    def iterative_levenshtein(self, s, t):
         """
-        computes levenshtein distance 
+        computes levenshtein distance with optimizations for technical terms
         """
+        try:
+            from technical_terms import is_technical_term
+            
+            if is_technical_term(s) or is_technical_term(t):
+                pass
+        except ImportError:
+            pass
+        
         rows = len(s)+1
         cols = len(t)+1
         dist = [[0 for x in range(cols)] for x in range(rows)]

@@ -2,7 +2,10 @@
 import nltk
 import textdistance
 from math import log 
-from Common.filestools import Tools
+try:
+    from Common.filestools import Tools
+except ImportError:
+    Tools = None
 import configparser
 import re
 from nltk.stem import WordNetLemmatizer
@@ -10,8 +13,9 @@ import sys
 import argparse
 from nltk import FreqDist
 from nltk import ngrams
-from Extract.SpellError.distanceedit import DistanceEdit
-from Extract.SpellError.suffix import SuffixTree
+from distanceedit import DistanceEdit
+from suffix import SuffixTree
+from technical_terms import is_technical_term
 
 """
 Initialize global variables start
@@ -95,6 +99,10 @@ class DetectionEvent():
         print('GEN ENTS UNIQUE FILTERED')
         print(len(entities_unique_filtered))
         for k in entities_unique_filtered:
+            if is_technical_term(k[0]):
+                print(f'SKIPPING TECHNICAL TERM: {k[0]}')
+                continue
+                
             for i in library:
                 if(i[0] == k[0]):
                     print('ERROR: STILL CONTAINS MATCHING VALUES')
@@ -193,6 +201,10 @@ class DetectionEvent():
         print(len(chatProdEnts_unique_filtered))
         print(chatProdEnts_unique_filtered)
         for k in chatProdEnts_unique_filtered:
+            if is_technical_term(k):
+                print(f'SKIPPING TECHNICAL TERM: {k}')
+                continue
+                
             k_lower = k.lower()
             for i in prodEntity_output:
                 original = i[0]
