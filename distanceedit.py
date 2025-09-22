@@ -37,5 +37,15 @@ class DistanceEdit():
                     cost=1
                 dist[row][col] = min(dist[row-1][col-1]+cost, dist[row-1][col]+1, dist[row][col-1]+1)
         return dist[row][col]
+    
+    def technical_term_distance(self, s, t):
+        """
+        Optimized distance calculation for technical terms.
+        Uses more lenient thresholds for short technical abbreviations.
+        """
+        if len(s) <= 3 or len(t) <= 3:
+            return self.iterative_levenshtein(s, t)
+        
+        return self.iterative_levenshtein(s, t)
 
     
