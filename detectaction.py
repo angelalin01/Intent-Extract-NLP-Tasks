@@ -37,7 +37,7 @@ chatActionEnts_filtered = [] #all words with verb POS tags that are not in the t
 freqCount = []
 sameWords_freqCount = []
 same_words = []
-levshDist = 2
+levshDist = 3
 levsh_ratio_thresh = 1/3 #Levsh ratio = levenshtein distance/length of correctly spelled word
 #same_word_count = 0
 potential_spell_error = 0
