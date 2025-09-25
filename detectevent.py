@@ -37,6 +37,7 @@ levsh_ratio_thresh = 1/3
 most_freq_prods_words = []
 most_freq_gens_words = []
 same_words = []
+MIN_SUBSTRING_LENGTH = 3
 """
 Initialize global variables end
 """
@@ -122,7 +123,7 @@ class DetectionEvent():
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
@@ -245,7 +246,7 @@ class DetectionEvent():
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
@@ -278,7 +279,7 @@ class DetectionEvent():
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
