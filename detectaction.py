@@ -61,6 +61,11 @@ lemmatizer = WordNetLemmatizer()
 Initialize global variables end
 """
 
+MIN_WORD_LENGTH = 3
+MIN_SUBSTRING_LENGTH = 2
+MIN_LCS_LENGTH = 4
+MEDIUM_WORD_THRESHOLD = 6
+
 class DetectionAction():
 
     def get_act_ents_from_chats(self): 
@@ -73,7 +78,7 @@ class DetectionAction():
             pos_tags = nltk.pos_tag(tokens)
             for j in pos_tags:
                 #we only care if the tag is a verb/action word 
-                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= 3 and j[0] not in read_freq_words_words):
+                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= MIN_WORD_LENGTH and j[0] not in read_freq_words_words):
                     chatActionEnts_filtered.append([j[0], j[1]])
                     if(j[1] == 'VB'):
                         VB_count = VB_count+1
@@ -154,23 +159,23 @@ class DetectionAction():
                             afterFirstLetterFilter.append([k[0], i[0]])
                             #APPLY LONGEST SUBSTRING FILTER
                         
-                            if(len(k[0]) <=3):
+                            if(len(k[0]) <= MIN_WORD_LENGTH):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
-                            elif(len(k[0]) <6):
+                            elif(len(k[0]) < MEDIUM_WORD_THRESHOLD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_WORD_LENGTH):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_LCS_LENGTH):
                                     longest_substr_filter.append([k[0], i[0]])
         print('AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
