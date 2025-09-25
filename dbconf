@@ -1,0 +1,15 @@
+[file]
+KB_content = data/kb_content.csv
+aet = data/action_entities.csv
+datasource = data/datasource.csv
+prodsource = data/prodsource.csv
+pet = data/product_entities.csv
+ote = data/other_entities.csv
+pesw = data/stopwords.txt
+ambInd = data/ambiguity_indicators.csv
+testSpell = data/spell_test.csv
+otherEvent = data/other_events.csv
+mostfreqProd = data/most_frequent_products.csv
+
+[watson]
+api_key = 
