@@ -30,6 +30,8 @@ spell_test = Tools.read_csv_chats(spellErrorTest)
 read_freq_words = Tools.read_csv(freqWordFile)
 read_freq_words_words = [(i[0]).lower() for i in read_freq_words]
 actionEntity_output = Tools.read_csv(actionEntityFile)
+MIN_WORD_LENGTH = 3
+MIN_SUBSTRING_LENGTH = 3
 levshDist = 3
 same_word_count = 0
 potential_spell_error = 0
@@ -122,7 +124,7 @@ class DetectionEvent():
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
@@ -245,7 +247,7 @@ class DetectionEvent():
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
@@ -278,7 +280,7 @@ class DetectionEvent():
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
