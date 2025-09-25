@@ -1,0 +1,11 @@
+[file]
+datasource = data/chat_transcripts.csv
+aet = data/action_entities.csv
+pet = data/product_entities.csv
+mostfreqAct = data/most_frequent_actions.csv
+testSpell = data/spell_test.csv
+otherEvent = data/other_events.csv
+
+[thresholds]
+levsh_dist = 2
+levsh_ratio_thresh = 0.333333
