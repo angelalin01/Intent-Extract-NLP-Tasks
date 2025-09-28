@@ -1,6 +1,8 @@
 import json
 import nltk
 import configparser
+import os
+import sys
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features, CategoriesOptions, ConceptsOptions, KeywordsOptions, EntitiesOptions, RelationsOptions, SemanticRolesOptions
 from filestools import Tools
@@ -18,10 +20,15 @@ for i in action_entity_output:
 read_output_relations_semantics = Tools.read_csv_KB_relations_semantics(datafile)
 output = []
 
+watson_api_key = os.getenv('WATSON_API_KEY')
+if not watson_api_key:
+    print("Error: WATSON_API_KEY environment variable is not set.")
+    print("Please set the WATSON_API_KEY environment variable before running this script.")
+    sys.exit(1)
 
 natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=watson_api_key,
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -212,9 +219,14 @@ def check_if_action_key_exists(action, actions_to_entities_dict, values_to_actio
 #OTHER WATSON TEST FUNCTIONS
 def test_watson():
     #print('hi')
+    watson_api_key = os.getenv('WATSON_API_KEY')
+    if not watson_api_key:
+        print("Error: WATSON_API_KEY environment variable is not set.")
+        return
+    
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=watson_api_key,
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
     #print('xx')
@@ -256,10 +268,14 @@ def test_watson():
 
 #semantic roles 
 def test_example():
+    watson_api_key = os.getenv('WATSON_API_KEY')
+    if not watson_api_key:
+        print("Error: WATSON_API_KEY environment variable is not set.")
+        return
         
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=watson_api_key,
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -284,9 +300,14 @@ def test_example():
 
 
 def test_example_relations():
+    watson_api_key = os.getenv('WATSON_API_KEY')
+    if not watson_api_key:
+        print("Error: WATSON_API_KEY environment variable is not set.")
+        return
+        
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=watson_api_key,
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -310,9 +331,14 @@ def test_example_relations():
 
 def test_watson_relations_semantics():
     #print('hi')
+    watson_api_key = os.getenv('WATSON_API_KEY')
+    if not watson_api_key:
+        print("Error: WATSON_API_KEY environment variable is not set.")
+        return
+        
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=watson_api_key,
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
     string = 'Add licenses or services to an existing subscription'
