@@ -19,4 +19,14 @@ See disambiguation explanation PDF for more in-depth explanation.
 ## Natural Language Analysis
 freqDist.py and explore_watson3.py
 Functions using IBM Watson Natural Language Understanding API and Python NLTK to perform various natural language analysis (frequency of words, semantic roles etc.). 
-See actual python files for explanation of functions. 
+See actual python files for explanation of functions.
+
+## Environment Setup
+This project requires an IBM Watson Natural Language Understanding API key to function properly.
+
+### Setting up the Watson API Key
+1. Copy the example environment file: `cp .env.example .env`
+2. Edit the `.env` file and replace `your_watson_api_key_here` with your actual IBM Watson API key
+3. Alternatively, set the environment variable directly: `export WATSON_API_KEY=your_actual_api_key_here`
+
+**Security Note**: Never commit your actual API key to version control. The API key should only be stored in environment variables or secure configuration files that are not tracked by git.   
