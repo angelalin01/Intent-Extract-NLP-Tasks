@@ -1,0 +1,8 @@
+[file]
+KB_content = 
+aet = 
+
+[watson]
+api_key = ${WATSON_API_KEY}
+version = 2019-07-12
+url = https://gateway.watsonplatform.net/natural-language-understanding/api

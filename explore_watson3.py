@@ -1,6 +1,7 @@
 import json
 import nltk
 import configparser
+import os
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features, CategoriesOptions, ConceptsOptions, KeywordsOptions, EntitiesOptions, RelationsOptions, SemanticRolesOptions
 from filestools import Tools
@@ -9,6 +10,9 @@ cf = configparser.ConfigParser()
 cf.read("dbconf")
 datafile = cf.get("file", "KB_content")
 action_entities = cf.get("file", "aet")
+watson_api_key = os.getenv('WATSON_API_KEY', cf.get("watson", "api_key", fallback=''))
+watson_version = cf.get("watson", "version", fallback='2019-07-12')
+watson_url = cf.get("watson", "url", fallback='https://gateway.watsonplatform.net/natural-language-understanding/api')
 read_output = Tools.read_csv_KB(datafile)
 action_entity_output = Tools.read_csv(action_entities)
 action_entity_output_string = []
@@ -20,9 +24,9 @@ output = []
 
 
 natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+    version=watson_version,
+    iam_apikey=watson_api_key,
+    url=watson_url
     )
 
 
@@ -213,9 +217,9 @@ def check_if_action_key_exists(action, actions_to_entities_dict, values_to_actio
 def test_watson():
     #print('hi')
     natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+    version=watson_version,
+    iam_apikey=watson_api_key,
+    url=watson_url
     )
     #print('xx')
     for i in read_output:
@@ -258,9 +262,9 @@ def test_watson():
 def test_example():
         
     natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+    version=watson_version,
+    iam_apikey=watson_api_key,
+    url=watson_url
     )
 
     
@@ -285,9 +289,9 @@ def test_example():
 
 def test_example_relations():
     natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+    version=watson_version,
+    iam_apikey=watson_api_key,
+    url=watson_url
     )
 
     response1 = natural_language_understanding.analyze(
@@ -311,9 +315,9 @@ def test_example_relations():
 def test_watson_relations_semantics():
     #print('hi')
     natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
-    url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+    version=watson_version,
+    iam_apikey=watson_api_key,
+    url=watson_url
     )
     string = 'Add licenses or services to an existing subscription'
 
