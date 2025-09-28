@@ -41,6 +41,10 @@ same_words = []
 Initialize global variables end
 """
 
+MIN_WORD_LENGTH = 3
+SHORT_WORD_THRESHOLD = 3
+MEDIUM_WORD_THRESHOLD = 6
+
 class DetectionEvent():
 
     def test_spell_error_prod(self):
@@ -112,17 +116,17 @@ class DetectionEvent():
                         if(i[0][0] == k[0][0] and i[0][1] == k[0][1]):
                             afterFirstLetterFilter.append([k[0], i[0]])
                             #APPLY LONGEST SUBSTRING FILTER
-                            if(len(k[0]) <=3):
+                            if(len(k[0]) <= SHORT_WORD_THRESHOLD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
                                 if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
-                            elif(len(k[0]) <6):
+                            elif(len(k[0]) < MEDIUM_WORD_THRESHOLD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= SHORT_WORD_THRESHOLD):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
@@ -233,19 +237,19 @@ class DetectionEvent():
                         if(ent[0] == k_lower[0] and ent[1] == k_lower[1]):
                             afterFirstLetterFilter.append([k, ent])
                             #APPLY LONGEST SUBSTRING FILTER
-                            if(len(k) <=3):
+                            if(len(k) <= SHORT_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
                                 if(len(lcs[0]) >= 2 and len(ent) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
-                            elif(len(k) <6):
+                            elif(len(k) < MEDIUM_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= SHORT_WORD_THRESHOLD):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
@@ -266,19 +270,19 @@ class DetectionEvent():
                             afterFirstLetterFilter.append([k, syn])
                             #APPLY LONGEST SUBSTRING FILTER
                         
-                            if(len(k) <=3):
+                            if(len(k) <= SHORT_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
                                 if(len(lcs[0]) >= 2 and len(syn) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
-                            elif(len(k) <6):
+                            elif(len(k) < MEDIUM_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= SHORT_WORD_THRESHOLD):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
