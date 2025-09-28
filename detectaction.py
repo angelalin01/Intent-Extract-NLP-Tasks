@@ -57,6 +57,14 @@ same_words_VBP = 0
 same_words_VBZ = 0
 #add a lemmatizer to make comparisons easier
 lemmatizer = WordNetLemmatizer()
+
+MIN_WORD_LENGTH = 3          # Minimum word length for verb filtering
+MAX_SHORT_WORD = 3           # Maximum length for short word category
+MAX_MEDIUM_WORD = 6          # Maximum length for medium word category  
+MIN_LCS_SHORT = 2            # Minimum LCS length for short words
+MIN_LCS_MEDIUM = 3           # Minimum LCS length for medium words
+MIN_LCS_LONG = 4             # Minimum LCS length for long words
+
 """
 Initialize global variables end
 """
@@ -73,7 +81,7 @@ class DetectionAction():
             pos_tags = nltk.pos_tag(tokens)
             for j in pos_tags:
                 #we only care if the tag is a verb/action word 
-                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= 3 and j[0] not in read_freq_words_words):
+                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= MIN_WORD_LENGTH and j[0] not in read_freq_words_words):
                     chatActionEnts_filtered.append([j[0], j[1]])
                     if(j[1] == 'VB'):
                         VB_count = VB_count+1
@@ -154,23 +162,23 @@ class DetectionAction():
                             afterFirstLetterFilter.append([k[0], i[0]])
                             #APPLY LONGEST SUBSTRING FILTER
                         
-                            if(len(k[0]) <=3):
+                            if(len(k[0]) <= MAX_SHORT_WORD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_LCS_SHORT and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
-                            elif(len(k[0]) <6):
+                            elif(len(k[0]) < MAX_MEDIUM_WORD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_LCS_MEDIUM):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_LCS_LONG):
                                     longest_substr_filter.append([k[0], i[0]])
         print('AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
