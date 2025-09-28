@@ -41,6 +41,13 @@ same_words = []
 Initialize global variables end
 """
 
+MIN_WORD_LENGTH = 3
+SHORT_WORD_THRESHOLD = 3
+MEDIUM_WORD_THRESHOLD = 6
+MIN_SUBSTRING_SHORT = 2
+MIN_SUBSTRING_MEDIUM = 3
+MIN_SUBSTRING_LONG = 4
+
 class DetectionEvent():
 
     def test_spell_error_prod(self):
@@ -112,23 +119,23 @@ class DetectionEvent():
                         if(i[0][0] == k[0][0] and i[0][1] == k[0][1]):
                             afterFirstLetterFilter.append([k[0], i[0]])
                             #APPLY LONGEST SUBSTRING FILTER
-                            if(len(k[0]) <=3):
+                            if(len(k[0]) <= SHORT_WORD_THRESHOLD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_SHORT and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
-                            elif(len(k[0]) <6):
+                            elif(len(k[0]) < MEDIUM_WORD_THRESHOLD):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_MEDIUM):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LONG):
                                     longest_substr_filter.append([k[0], i[0]])   
         print('GENERAL ENTS: AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
@@ -233,26 +240,26 @@ class DetectionEvent():
                         if(ent[0] == k_lower[0] and ent[1] == k_lower[1]):
                             afterFirstLetterFilter.append([k, ent])
                             #APPLY LONGEST SUBSTRING FILTER
-                            if(len(k) <=3):
+                            if(len(k) <= SHORT_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(ent) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_SHORT and len(ent) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
-                            elif(len(k) <6):
+                            elif(len(k) < MEDIUM_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_MEDIUM):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LONG):
                                     longest_substr_filter.append([k, ent])
 
                     #CONSIDER SYNONYM MATCH CASE
@@ -266,26 +273,26 @@ class DetectionEvent():
                             afterFirstLetterFilter.append([k, syn])
                             #APPLY LONGEST SUBSTRING FILTER
                         
-                            if(len(k) <=3):
+                            if(len(k) <= SHORT_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(syn) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_SHORT and len(syn) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
-                            elif(len(k) <6):
+                            elif(len(k) < MEDIUM_WORD_THRESHOLD):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_MEDIUM):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LONG):
                                     longest_substr_filter.append([k, ent])
         print('PRODUCTS: AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
