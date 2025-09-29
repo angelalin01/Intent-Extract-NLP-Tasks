@@ -1,5 +1,6 @@
 import json
 import nltk
+import os
 import configparser
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import Features, CategoriesOptions, ConceptsOptions, KeywordsOptions, EntitiesOptions, RelationsOptions, SemanticRolesOptions
@@ -21,7 +22,7 @@ output = []
 
 natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=os.getenv('WATSON_API_KEY'),
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -214,7 +215,7 @@ def test_watson():
     #print('hi')
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=os.getenv('WATSON_API_KEY'),
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
     #print('xx')
@@ -259,7 +260,7 @@ def test_example():
         
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=os.getenv('WATSON_API_KEY'),
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -286,7 +287,7 @@ def test_example():
 def test_example_relations():
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=os.getenv('WATSON_API_KEY'),
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
 
@@ -312,7 +313,7 @@ def test_watson_relations_semantics():
     #print('hi')
     natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2019-07-12',
-    iam_apikey='INJBZJ_fupvtsCswpI9UUOBZZmOYp6vHkHPEAZX_WU31',
+    iam_apikey=os.getenv('WATSON_API_KEY'),
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
     )
     string = 'Add licenses or services to an existing subscription'
