@@ -26,14 +26,28 @@ chatPRodEnts_POS = []
 chatProdEnts_unique_filtered = []
 all_words = []
 
+PROPER_NOUN_SINGULAR_WEIGHT = 1.8
+PROPER_NOUN_PLURAL_WEIGHT = 1.7
+SINGULAR_NOUN_WEIGHT = 1.3
+PLURAL_NOUN_WEIGHT = 1.2
+CARDINAL_DIGIT_WEIGHT = 1.1
+
+SINGLE_ENTITY_CONFIDENCE_THRESHOLD = 0.83
+MULTIPLE_ENTITY_CONFIDENCE_THRESHOLD = 1.0
+
+MIN_WORD_LENGTH = 3
+MIN_SUBSTRING_LENGTH_SHORT = 2
+MIN_SUBSTRING_LENGTH_MEDIUM = 3
+MIN_SUBSTRING_LENGTH_LONG = 4
+
 #weights
-nnp_weigh = 1.8 #proper noun, singular
-nnps_weigh = 1.7 #proper noun, plural
-nn_weigh = 1.3 #singular noun
-nns_weigh = 1.2 #plural noun
-cd_weigh = 1.1 #cardinal digit
-single_confidence = 0.83
-multiple_confidence = 1.0
+nnp_weigh = PROPER_NOUN_SINGULAR_WEIGHT
+nnps_weigh = PROPER_NOUN_PLURAL_WEIGHT
+nn_weigh = SINGULAR_NOUN_WEIGHT
+nns_weigh = PLURAL_NOUN_WEIGHT
+cd_weigh = CARDINAL_DIGIT_WEIGHT
+single_confidence = SINGLE_ENTITY_CONFIDENCE_THRESHOLD
+multiple_confidence = MULTIPLE_ENTITY_CONFIDENCE_THRESHOLD
 
 def clean_event_entity(st1):
     #st1 is each row of the data.csv chat log

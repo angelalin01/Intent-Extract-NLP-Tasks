@@ -12,6 +12,7 @@ from nltk import FreqDist
 from nltk import ngrams
 from Extract.SpellError.distanceedit import DistanceEdit
 from Extract.SpellError.suffix import SuffixTree
+from freqDist import MIN_WORD_LENGTH, MIN_SUBSTRING_LENGTH_SHORT, MIN_SUBSTRING_LENGTH_MEDIUM, MIN_SUBSTRING_LENGTH_LONG
 
 """
 Initialize global variables start
@@ -37,8 +38,11 @@ chatActionEnts_filtered = [] #all words with verb POS tags that are not in the t
 freqCount = []
 sameWords_freqCount = []
 same_words = []
-levshDist = 2
-levsh_ratio_thresh = 1/3 #Levsh ratio = levenshtein distance/length of correctly spelled word
+LEVENSHTEIN_DISTANCE_THRESHOLD = 2
+LEVENSHTEIN_RATIO_THRESHOLD = 1/3
+
+levshDist = LEVENSHTEIN_DISTANCE_THRESHOLD
+levsh_ratio_thresh = LEVENSHTEIN_RATIO_THRESHOLD
 #same_word_count = 0
 potential_spell_error = 0
 most_frequent = []
@@ -73,7 +77,7 @@ class DetectionAction():
             pos_tags = nltk.pos_tag(tokens)
             for j in pos_tags:
                 #we only care if the tag is a verb/action word 
-                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= 3 and j[0] not in read_freq_words_words):
+                if(j[1] in ('VB', 'VBD', 'VBN', 'VBG', 'VBP', 'VBZ') and len(j[0]) >= MIN_WORD_LENGTH and j[0] not in read_freq_words_words):
                     chatActionEnts_filtered.append([j[0], j[1]])
                     if(j[1] == 'VB'):
                         VB_count = VB_count+1
@@ -158,19 +162,19 @@ class DetectionAction():
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_SHORT and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
                             elif(len(k[0]) <6):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_MEDIUM):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_LONG):
                                     longest_substr_filter.append([k[0], i[0]])
         print('AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
