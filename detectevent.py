@@ -12,6 +12,7 @@ from nltk import FreqDist
 from nltk import ngrams
 from Extract.SpellError.distanceedit import DistanceEdit
 from Extract.SpellError.suffix import SuffixTree
+from freqDist import MIN_SUBSTRING_LENGTH_SHORT, MIN_SUBSTRING_LENGTH_MEDIUM, MIN_SUBSTRING_LENGTH_LONG
 
 """
 Initialize global variables start
@@ -30,10 +31,13 @@ spell_test = Tools.read_csv_chats(spellErrorTest)
 read_freq_words = Tools.read_csv(freqWordFile)
 read_freq_words_words = [(i[0]).lower() for i in read_freq_words]
 actionEntity_output = Tools.read_csv(actionEntityFile)
-levshDist = 3
+LEVENSHTEIN_DISTANCE_THRESHOLD = 3
+LEVENSHTEIN_RATIO_THRESHOLD = 1/3
+
+levshDist = LEVENSHTEIN_DISTANCE_THRESHOLD
 same_word_count = 0
 potential_spell_error = 0
-levsh_ratio_thresh = 1/3
+levsh_ratio_thresh = LEVENSHTEIN_RATIO_THRESHOLD
 most_freq_prods_words = []
 most_freq_gens_words = []
 same_words = []
@@ -116,19 +120,19 @@ class DetectionEvent():
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(i[0]) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_SHORT and len(i[0]) == len(k[0])):
                                     longest_substr_filter.append([k[0], i[0]])
                             elif(len(k[0]) <6):
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_MEDIUM):
                                     longest_substr_filter.append([k[0], i[0]])
                             else:
                                 sufftree.append_string(i[0])
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_LONG):
                                     longest_substr_filter.append([k[0], i[0]])   
         print('GENERAL ENTS: AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
@@ -238,21 +242,21 @@ class DetectionEvent():
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(ent) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_SHORT and len(ent) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
                             elif(len(k) <6):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_MEDIUM):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
                                 sufftree.append_string(ent)
                                 sufftree.append_string(k)
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_LONG):
                                     longest_substr_filter.append([k, ent])
 
                     #CONSIDER SYNONYM MATCH CASE
@@ -271,21 +275,21 @@ class DetectionEvent():
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 2 and len(syn) == len(k[0])):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_SHORT and len(syn) == len(k[0])):
                                     longest_substr_filter.append([k, ent])
                             elif(len(k) <6):
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 3):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_MEDIUM):
                                     longest_substr_filter.append([k, ent])
                             else:
                                 sufftree = SuffixTree()
                                 sufftree.append_string(syn)
                                 sufftree.append_string(k[0])
                                 lcs = sufftree.find_longest_common_substrings()
-                                if(len(lcs[0]) >= 4):
+                                if(len(lcs[0]) >= MIN_SUBSTRING_LENGTH_LONG):
                                     longest_substr_filter.append([k, ent])
         print('PRODUCTS: AFTER FIRST LETTER FILTER')
         print(afterFirstLetterFilter)
